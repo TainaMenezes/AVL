@@ -14,7 +14,7 @@ public interface AVLInterface {
     
     public boolean isEmpty();
     public void insertNode(int key);
-    public void removeNode();
+    public void removeNode(int key);
     public Node searchNode(Node no, int key);
     public int height(Node no);
     public void printTree(Node no);

@@ -51,11 +51,11 @@ public class AVLImpl implements AVLInterface{
         do {
             if (no == parent.getLeftChild()){
                 parent.setFb(parent.getFb() + 1);
-                System.out.println("Pai:"+parent.getKey() +" fb: "+parent.getFb());
+                System.out.println("Atualizando Fb de ["+parent.getKey() +"] fb("+parent.getFb()+")");
             }
             else if (no == parent.getRightChild()){
                 parent.setFb(parent.getFb() - 1);
-                System.out.println("Pai:"+parent.getKey() +" fb: "+parent.getFb());
+                System.out.println("Atualizando Fb de ["+parent.getKey() +"] fb("+parent.getFb()+")");
             }
             if (parent.getFb()== 0){
                 break;
@@ -65,7 +65,7 @@ public class AVLImpl implements AVLInterface{
                 rSLeft(parent);
             }
             if (parent.getFb()== +2){
-               return;
+               rSRight(parent);
             }
             parent = parent.getParent();
             if (no.getParent() == null) break;
@@ -78,22 +78,31 @@ public class AVLImpl implements AVLInterface{
     
     //Atualizar FB em remocao
     public void updateFbRemove(Node no){
-    Node parent = no.getParent();
-    
-    while(parent != null){
-        if (no == parent.getLeftChild()){
-            parent.setFb(parent.getFb() - 1);
-            
-        }
-        else if (no == parent.getRightChild()){
-            parent.setFb(parent.getFb() + 1);
-        }
-        if (parent.getFb() != 0) break;
-        parent = parent.getParent();
-        no = no.getParent();
-       
+        Node parent = no.getParent();
+        do {
+            if (no == parent.getLeftChild()){
+                parent.setFb(parent.getFb() - 1);
+                System.out.println("Atualizando Fb de ["+parent.getKey() +"] fb("+parent.getFb()+")");
+            }
+            else if (no == parent.getRightChild()){
+                parent.setFb(parent.getFb() + 1);
+                System.out.println("Atualizando Fb de ["+parent.getKey() +"] fb("+parent.getFb()+")");
+            }
+            if (parent.getFb()== 0){
+                break;
+                
+            }
+            if (parent.getFb()== -2){
+                rSLeft(parent);
+            }
+            if (parent.getFb()== +2){
+               rSRight(parent);
+            }
+            parent = parent.getParent();
+            if (no.getParent() == null) break;
+            else no = no.getParent();
+        } while (parent != null);
     }
-}
     
     //Inserir novo node
     public void insertNode(int key){
@@ -122,7 +131,32 @@ public class AVLImpl implements AVLInterface{
     }
     
     //Remover um node
-    public void removeNode() {
+    public void removeNode(int key) {
+        
+        if (isEmpty()){
+            System.out.println("TA VAZIA MANO");
+        }
+        else{
+            Node found = searchNode(root, key);
+            
+            if(key == found.getKey()){
+                System.out.println("Achooooooou");
+                if(found.getLeftChild() == null && found.getRightChild() == null){
+                    Node pai = found.getParent();
+                    if(key > pai.getKey()){
+                        pai.setRightChild(null);
+                    }
+                    else{
+                        pai.setLeftChild(null);
+                    }
+                }
+                System.out.println("Node " +found.getKey()+ " removido.");
+                updateFbRemove(found);
+            }
+            else{
+                System.out.println("Node " +found.getKey()+ " nao existe.");
+            }   
+        }
         
     }
 
@@ -138,8 +172,15 @@ public class AVLImpl implements AVLInterface{
            root = son;
            son.setParent(null);
            no.setParent(son);
-           son.setLeftChild(no);
-           no.setRightChild(null);
+           
+           if (son.getLeftChild()!= null){
+               no.setRightChild(son.getLeftChild());
+               son.setLeftChild(no);
+           }
+           else{
+                son.setLeftChild(no);
+                no.setRightChild(null);
+           }
        }
        else{
            son.setParent(pai);
@@ -150,8 +191,8 @@ public class AVLImpl implements AVLInterface{
            
        }
        
-       no.setFb(Math.abs(no.getFb()) - 1 - max(Math.abs(son.getFb()),0));
-       son.setFb(Math.abs(son.getFb()) - 1 + min(Math.abs(no.getFb()),0));
+       no.setFb((Math.abs(no.getFb()) - 1)- max(Math.abs(son.getFb()),0));
+       son.setFb((Math.abs(son.getFb()) - 1 )+ min(Math.abs(no.getFb()),0));
        
     }
     
@@ -168,20 +209,37 @@ public class AVLImpl implements AVLInterface{
            root = son;
            son.setParent(null);
            no.setParent(son);
-           son.setRightChild(no);
-           no.setLeftChild(null);
+           
+           if(son.getRightChild()!= null){
+                no.setLeftChild(son.getRightChild());
+                son.setRightChild(no);
+           }
+           else{
+               son.setRightChild(no);
+               no.setLeftChild(null);
+           }
+           
        }
        else{
            son.setParent(pai);
            pai.setLeftChild(son);
            no.setParent(son);
-           son.setRightChild(no);
-           no.setLeftChild(null);
+           
+           if(son.getRightChild()!= null){
+                no.setLeftChild(son.getRightChild());
+                son.setRightChild(no);
+           }
+           else{
+               son.setRightChild(no);
+               no.setLeftChild(null);
+           }
            
        }
        
-       no.setFb(Math.abs(no.getFb()) + 1 - min(Math.abs(son.getFb()),0));
-       son.setFb(Math.abs(son.getFb()) + 1 + max(Math.abs(no.getFb()),0));
+       no.setFb((Math.abs(no.getFb()) - 1)- max(Math.abs(son.getFb()),0));
+       son.setFb((Math.abs(son.getFb()) - 1 )+ min(Math.abs(no.getFb()),0));
+       //no.setFb((Math.abs(no.getFb()) + 1) - min(Math.abs(son.getFb()),0));
+       //son.setFb((Math.abs(son.getFb()) + 1) + max(Math.abs(no.getFb()),0));
        
     }
     
