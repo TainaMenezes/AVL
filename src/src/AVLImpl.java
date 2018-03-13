@@ -6,6 +6,7 @@
 package src;
 
 import static java.lang.Integer.max;
+import static java.lang.Integer.min;
 
 
 /**
@@ -42,10 +43,12 @@ public class AVLImpl implements AVLInterface{
        return no;
     }
     
+ 
+    
     //Atualizar FB em insercao
     public void updateFbInsert(Node no){
         Node parent = no.getParent();
-        do{
+        do {
             if (no == parent.getLeftChild()){
                 parent.setFb(parent.getFb() + 1);
                 System.out.println("Pai:"+parent.getKey() +" fb: "+parent.getFb());
@@ -54,11 +57,21 @@ public class AVLImpl implements AVLInterface{
                 parent.setFb(parent.getFb() - 1);
                 System.out.println("Pai:"+parent.getKey() +" fb: "+parent.getFb());
             }
+            if (parent.getFb()== 0){
+                break;
+                
+            }
+            if (parent.getFb()== -2){
+                rSLeft(parent);
+            }
+            if (parent.getFb()== +2){
+               return;
+            }
             parent = parent.getParent();
-            no = no.getParent();
-        //if (parent.getFb() == 0) break;    
-            
-        }while(parent != null);
+            if (no.getParent() == null) break;
+            else no = no.getParent();
+        } while (parent != null);
+
         
     }
     
@@ -75,8 +88,10 @@ public class AVLImpl implements AVLInterface{
         else if (no == parent.getRightChild()){
             parent.setFb(parent.getFb() + 1);
         }
-        
         if (parent.getFb() != 0) break;
+        parent = parent.getParent();
+        no = no.getParent();
+       
     }
 }
     
@@ -105,26 +120,71 @@ public class AVLImpl implements AVLInterface{
             
         }
     }
+    
+    //Remover um node
+    public void removeNode() {
+        
+    }
 
     //ROTACAO SIMPLES A ESQUERDA
     public void rSLeft(Node no) {
-       Node top = no.getParent();
-       Node parentTree = top.getParent();
        
-       no.setParent(parentTree);
-       top.setParent(no);
-       Node leftson = no.getLeftChild();
-       no.setLeftChild(top);
-       top.setRightChild(leftson);
-       leftson.setParent(top);
-       if (no.getKey()>parentTree.getKey()){
-           parentTree.setRightChild(no);
+       System.out.println(no.getKey()+" DESBALANCEADO!");
+       System.out.println("\nFAZENDO ROTACAO SIMPLES A ESQUERDA");
+       Node son = no.getRightChild(); //FILHO DIREITO DO NO DESBALANCEADO
+       Node pai = no.getParent(); //PAI DO NO DESBALANCEADO
+       
+       if (pai == null){
+           root = son;
+           son.setParent(null);
+           no.setParent(son);
+           son.setLeftChild(no);
+           no.setRightChild(null);
        }
        else{
-           parentTree.setLeftChild(no);
+           son.setParent(pai);
+           pai.setRightChild(son);
+           no.setParent(son);
+           son.setLeftChild(no);
+           no.setRightChild(null);
+           
        }
        
+       no.setFb(Math.abs(no.getFb()) - 1 - max(Math.abs(son.getFb()),0));
+       son.setFb(Math.abs(son.getFb()) - 1 + min(Math.abs(no.getFb()),0));
+       
     }
+    
+    
+    //ROTACAO SIMPLES A DIREITA
+    public void rSRight(Node no) {
+     
+       System.out.println(no.getKey()+" DESBALANCEADO!");
+       System.out.println("\nFAZENDO ROTACAO SIMPLES A DIREITA");
+       Node son = no.getLeftChild(); //FILHO DIREITO DO NO DESBALANCEADO
+       Node pai = no.getParent(); //PAI DO NO DESBALANCEADO
+       
+       if (pai == null){
+           root = son;
+           son.setParent(null);
+           no.setParent(son);
+           son.setRightChild(no);
+           no.setLeftChild(null);
+       }
+       else{
+           son.setParent(pai);
+           pai.setLeftChild(son);
+           no.setParent(son);
+           son.setRightChild(no);
+           no.setLeftChild(null);
+           
+       }
+       
+       no.setFb(Math.abs(no.getFb()) + 1 - min(Math.abs(son.getFb()),0));
+       son.setFb(Math.abs(son.getFb()) + 1 + max(Math.abs(no.getFb()),0));
+       
+    }
+    
     
     //Calcula a altura
     public int height(Node no){
@@ -172,26 +232,6 @@ public class AVLImpl implements AVLInterface{
         }    
     }
     
-    
-    
-    
-    
-    
-    
-
-
-
-    @Override
-    public void removeNode() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    
-
-    @Override
-    public void rSRight(Node no) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
 
     @Override
     public void rDLeft(Node no) {
